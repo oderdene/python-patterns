@@ -13,7 +13,7 @@ attribute dictionary called __dict__. Usually, each instance will have
 its own dictionary, but the Borg pattern modifies this so that all
 instances have the same dictionary.
 In this example, the __shared_state attribute will be the dictionary
-shared between all instances, and this is ensured by assigining
+shared between all instances, and this is ensured by assigning
 __shared_state to the __dict__ variable when initializing a new
 instance (i.e., in the __init__ method). Other attributes are usually
 added to the instance's attribute dictionary, but, since the attribute
@@ -32,18 +32,19 @@ https://github.com/onetwopunch/pythonDbTemplate/blob/master/database.py
 *TL;DR
 Provides singleton-like behavior sharing state between instances.
 """
+
 from typing import Dict
 
 
 class Borg:
     _shared_state: Dict[str, str] = {}
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.__dict__ = self._shared_state
 
 
 class YourBorg(Borg):
-    def __init__(self, state=None):
+    def __init__(self, state: str = None) -> None:
         super().__init__()
         if state:
             self.state = state
@@ -52,7 +53,7 @@ class YourBorg(Borg):
             if not hasattr(self, "state"):
                 self.state = "Init"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.state
 
 

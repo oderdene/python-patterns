@@ -9,13 +9,30 @@ where the solution is the sum of its parts.
 https://en.wikipedia.org/wiki/Blackboard_system
 """
 
-import abc
+from abc import ABC, abstractmethod
 import random
 
 
+class AbstractExpert(ABC):
+    """Abstract class for experts in the blackboard system."""
+    @abstractmethod
+    def __init__(self, blackboard) -> None:
+        self.blackboard = blackboard
+
+    @property
+    @abstractmethod
+    def is_eager_to_contribute(self) -> int:
+        raise NotImplementedError("Must provide implementation in subclass.")
+
+    @abstractmethod
+    def contribute(self) -> None:
+        raise NotImplementedError("Must provide implementation in subclass.")
+
+
 class Blackboard:
-    def __init__(self):
-        self.experts = []
+    """The blackboard system that holds the common state."""
+    def __init__(self) -> None:
+        self.experts: list = []
         self.common_state = {
             "problems": 0,
             "suggestions": 0,
@@ -23,12 +40,13 @@ class Blackboard:
             "progress": 0,  # percentage, if 100 -> task is finished
         }
 
-    def add_expert(self, expert):
+    def add_expert(self, expert: AbstractExpert) -> None:
         self.experts.append(expert)
 
 
 class Controller:
-    def __init__(self, blackboard):
+    """The controller that manages the blackboard system."""
+    def __init__(self, blackboard: Blackboard) -> None:
         self.blackboard = blackboard
 
     def run_loop(self):
@@ -43,26 +61,16 @@ class Controller:
         return self.blackboard.common_state["contributions"]
 
 
-class AbstractExpert(metaclass=abc.ABCMeta):
-    def __init__(self, blackboard):
-        self.blackboard = blackboard
-
-    @property
-    @abc.abstractmethod
-    def is_eager_to_contribute(self):
-        raise NotImplementedError("Must provide implementation in subclass.")
-
-    @abc.abstractmethod
-    def contribute(self):
-        raise NotImplementedError("Must provide implementation in subclass.")
-
-
 class Student(AbstractExpert):
+    """Concrete class for a student expert."""
+    def __init__(self, blackboard) -> None:
+        super().__init__(blackboard)
+
     @property
-    def is_eager_to_contribute(self):
+    def is_eager_to_contribute(self) -> bool:
         return True
 
-    def contribute(self):
+    def contribute(self) -> None:
         self.blackboard.common_state["problems"] += random.randint(1, 10)
         self.blackboard.common_state["suggestions"] += random.randint(1, 10)
         self.blackboard.common_state["contributions"] += [self.__class__.__name__]
@@ -70,11 +78,15 @@ class Student(AbstractExpert):
 
 
 class Scientist(AbstractExpert):
+    """Concrete class for a scientist expert."""
+    def __init__(self, blackboard) -> None:
+        super().__init__(blackboard)
+
     @property
-    def is_eager_to_contribute(self):
+    def is_eager_to_contribute(self) -> int:
         return random.randint(0, 1)
 
-    def contribute(self):
+    def contribute(self) -> None:
         self.blackboard.common_state["problems"] += random.randint(10, 20)
         self.blackboard.common_state["suggestions"] += random.randint(10, 20)
         self.blackboard.common_state["contributions"] += [self.__class__.__name__]
@@ -82,11 +94,14 @@ class Scientist(AbstractExpert):
 
 
 class Professor(AbstractExpert):
+    def __init__(self, blackboard) -> None:
+        super().__init__(blackboard)
+
     @property
-    def is_eager_to_contribute(self):
+    def is_eager_to_contribute(self) -> bool:
         return True if self.blackboard.common_state["problems"] > 100 else False
 
-    def contribute(self):
+    def contribute(self) -> None:
         self.blackboard.common_state["problems"] += random.randint(1, 2)
         self.blackboard.common_state["suggestions"] += random.randint(10, 20)
         self.blackboard.common_state["contributions"] += [self.__class__.__name__]
@@ -105,21 +120,13 @@ def main():
 
     >>> from pprint import pprint
     >>> pprint(contributions)
-    ['Student',
-     'Student',
-     'Student',
-     'Student',
-     'Scientist',
-     'Student',
-     'Student',
-     'Student',
-     'Scientist',
-     'Student',
-     'Scientist',
-     'Student',
-     'Student',
-     'Scientist',
-     'Professor']
+     ['Student',
+    'Scientist',
+    'Student',
+    'Scientist',
+    'Student',
+    'Scientist',
+    'Professor']
     """
 
 
